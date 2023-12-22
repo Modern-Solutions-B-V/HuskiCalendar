@@ -40,6 +40,7 @@ input {
 }
 
 
+
 .eventtitle {
   font-weight: bold;
   font-size: 12px;
@@ -55,6 +56,7 @@ input {
   word-wrap: break-word;
 
 }
+
 
 .event-place {
   font-size: 12px;
@@ -172,6 +174,38 @@ input {
 .event-details-value {
   font-size: 16px;
 }
+
+.rbc-time-header-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.rbc-time-header-cell {
+  height: 60px;
+  /* Adjust the height of each header cell as needed */
+}
+
+.rbc-time-content {
+  display: flex;
+  flex-direction: column;
+  /* Display time slots in a column */
+}
+
+
+
+.rbc-event {
+  position: static !important;
+  margin-bottom: 10px;
+}
+
+.rbc-event-content {
+  white-space: normal;
+}
+
+.rbc-event-continues {
+  background: #ff4500;
+}
+
 
 
 

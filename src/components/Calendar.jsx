@@ -34,9 +34,7 @@ const EventComponent = ({ event, currentView }) => {
             content = (
                 <div className="event-content">
                     <Scrollbars style={{ height: 40 }}>
-
                         <p className="event-title"><b>{event.title}</b></p>
-
                     </Scrollbars>
                 </div>
             );
@@ -48,20 +46,11 @@ const EventComponent = ({ event, currentView }) => {
                         {event.booking_elements
                             ?.sort((a, b) => new Date(a.startdate) - new Date(b.startdate))
                             .map((element, index) => {
-                                const overlappingElements = event.booking_elements.filter(
-                                    otherElement =>
-                                        (element.starttime >= otherElement.starttime && element.starttime <= otherElement.endtime) ||
-                                        (element.endtime >= otherElement.starttime && element.endtime <= otherElement.endtime) ||
-                                        (element.starttime <= otherElement.starttime && element.endtime >= otherElement.endtime)
-                                );
-
-                                // Vérifier si cet élément se superpose à d'autres
-                                const overlaps = overlappingElements.length > 1;
 
                                 return (
                                     <div
                                         key={index}
-                                        className={`booking-element ${overlaps ? 'overlapping' : ''}`}
+
                                     >
                                         <p className="element-tittle">
                                             <b>{element.element_name}</b>

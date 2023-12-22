@@ -13,6 +13,7 @@ import Calend from './components/Calendar';
 import PrivateRoute from './components/PrivateRoute';
 import ResetPassword from './components/ResetPassword';
 import ResetPage from './components/ResetPage';
+import Calender from './components/Calender';
 
 
 
@@ -25,6 +26,7 @@ root.render(
         <Route path="/register" element={<Register />} />
         <Route path="/activationemail/:activation_token" element={<ActivationEmail />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="calender" element={<Calender />} />
         <Route path="/resetPage/:id/:token" element={<ResetPage />} />
         <Route element={<PrivateRoute />}>
           <Route path="/calendar" element={<Calend />} />
