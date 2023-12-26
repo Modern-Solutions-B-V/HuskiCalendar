@@ -18,14 +18,13 @@ const locales = {
 const localizer = dateFnsLocalizer({
     format,
     parse,
-    startOfWeek: (date) => startOfWeek(date, { weekStartsOn: 1 }), // Lundi (1) comme premier jour
+    startOfWeek: (date) => startOfWeek(date, { weekStartsOn: 1 }),
     getDay,
     locales,
 });
 
-
-
 const EventComponent = ({ event, currentView }) => {
+    console.log(event)
     let content = null;
 
 
@@ -35,6 +34,7 @@ const EventComponent = ({ event, currentView }) => {
                 <div className="event-content">
                     <Scrollbars style={{ height: 40 }}>
                         <p className="event-title"><b>{event.title}</b></p>
+
                     </Scrollbars>
                 </div>
             );
@@ -44,13 +44,10 @@ const EventComponent = ({ event, currentView }) => {
                 <div className="event-content">
                     <Scrollbars style={{ height: 64 }}>
                         {event.booking_elements
-                            ?.sort((a, b) => new Date(a.startdate) - new Date(b.startdate))
                             .map((element, index) => {
-
                                 return (
                                     <div
                                         key={index}
-
                                     >
                                         <p className="element-tittle">
                                             <b>{element.element_name}</b>
@@ -90,6 +87,7 @@ const EventComponent = ({ event, currentView }) => {
     return content;
 };
 
+
 const Calend = () => {
     const [events, setEvents] = useState([]);
     const [currentView, setCurrentView] = useState("month");
@@ -100,7 +98,6 @@ const Calend = () => {
     };
     let startDate = startOfWeek(currentDate);
     let endDate = endOfWeek(currentDate);
-
 
     const [showModal, setShowModal] = useState(false);
     const handleSelectEvent = (event) => {
@@ -118,6 +115,7 @@ const Calend = () => {
         let startDate, endDate;
 
         switch (currentView) {
+
             case "month":
                 startDate = startOfMonth(currentDate);
                 endDate = endOfMonth(currentDate);
@@ -136,7 +134,6 @@ const Calend = () => {
                 break;
         }
 
-
         axios.get(`http://localhost:5000/booking/getBookingsByDateRange`, {
             params: {
                 startDate: startDate.toISOString(),
@@ -145,7 +142,7 @@ const Calend = () => {
         })
             .then((response) => {
                 const bookingEvents = response.data.map((booking) => ({
-                    title: booking.trip_name,
+                    title: booking.trip_name ? booking.trip_name : "No title available",
                     start: new Date(booking.startdate),
                     end: new Date(booking.enddate),
                     deptor_place: booking.deptor_place,
@@ -154,7 +151,6 @@ const Calend = () => {
                     number: booking.number,
                     company_name: booking.company_name,
                     contact_first_name: booking.contact_first_name,
-
                     bookingelements: booking.booking_elements.map((element) => ({
                         element_name: element.element_name,
                         start: new Date(element.startdate),
@@ -162,16 +158,17 @@ const Calend = () => {
                         starttime: element.starttime,
                         endtime: element.endtime,
                         supplier_place: element.supplier_place,
-
                     })),
-
                 }));
-                setEvents(bookingEvents);
+                const sortedEvents = bookingEvents.sort((eventA, eventB) => Number(eventA.number) - Number(eventB.number));
+                // console.log(sortedEvents)
+                setEvents(sortedEvents);
             })
             .catch((error) => {
                 console.error("Erreur lors de la récupération des réservations :", error);
             });
     }, [currentDate, currentView]);
+
 
     const clickRef = useRef(null);
     const onDoubleClickEvent = useCallback((calEvent) => {
@@ -196,27 +193,28 @@ const Calend = () => {
             <div className="container-fluid">
                 <div className="row">
                     {currentView === "week" && (
-                        <div className="col pt-md-5 mt-md-5 mt-lg-0 pt-lg-5 d-none d-md-block me-0 pe-0">
-                            <div className="rbc-header">
+                        <div className="col pt-md-5 mt-md-5 mt-lg-0 pt-lg-5 d-none d-md-block me-0 pe-0" >
+                            <div className="rbc-header" style={{ marginTop: "0.9px" }}>
                                 <span>Event</span>
                             </div>
+
                             {events
                                 .filter((event) => {
                                     startDate = startOfWeek(currentDate);
                                     endDate = endOfWeek(currentDate);
                                     return isWithinInterval(event.start, { start: startDate, end: endDate });
                                 })
-                                .sort((eventA, eventB) => eventA.start - eventB.start) // Tri par date croissante
                                 .map((event) => (
                                     <div key={event.id} className="eventalista">
                                         <div className="rbc-row-content-scroll-container">
-                                            <h6 className="eventtitla" style={{ textDecoration: 'underline' }}>{event.title}</h6 >
-                                            <h6 className="eventtitla" style={{ backgroundColor: 'yellow' }}>Status: {event.status_code}</h6 >
-                                            <h6 className="eventtitla">{`${format(event.start, 'dd/MMM/yyyy')}-${format(event.end, 'dd/MMM/yyyy')}`}</h6 >
+                                            <h6 className="eventtitla" style={{ textDecoration: 'underline' }}>{event.title}</h6>
+                                            <h6 className="eventtitla" style={{ backgroundColor: 'yellow' }}>Status: {event.status_code}</h6>
+                                            <h6 className="eventtitla">{`${format(event.start, 'dd/MMM/yyyy')}-${format(event.end, 'dd/MMM/yyyy')}`}</h6>
                                         </div>
                                     </div>
                                 ))
                             }
+
                         </div>
                     )}
                     {currentView === "day" && (
@@ -230,7 +228,6 @@ const Calend = () => {
                                     endDate = endOfWeek(currentDate);
                                     return isWithinInterval(event.start, { start: startDate, end: endDate });
                                 })
-                                .sort((eventA, eventB) => eventA.start - eventB.start) // Tri par date croissante
                                 .map((event) => (
                                     <div key={event.id} className="eventalista">
                                         <div className="rbc-row-content-scroll-container">
@@ -265,6 +262,7 @@ const Calend = () => {
 
                                 })),
                             }))}
+
                             startAccessor="start"
                             endAccessor="end"
                             style={{ height: 1000 }}
@@ -274,9 +272,9 @@ const Calend = () => {
                             onSelectEvent={(event) => handleSelectEvent(event)}
                             showAllEvents
                             onDoubleClickEvent={onDoubleClickEvent}
-
-
                         />
+
+
 
                     </div>
                 </div>
