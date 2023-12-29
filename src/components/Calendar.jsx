@@ -10,6 +10,11 @@ import { isWithinInterval, format } from 'date-fns';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
+import { connect } from "react-redux"
+import { addEvent, selectEvents } from "../redux/eventReducer";
+import { useDispatch, useSelector } from "react-redux";
+
+
 
 const locales = {
     "en-US": require("date-fns/locale/en-US"),
@@ -23,76 +28,29 @@ const localizer = dateFnsLocalizer({
     locales,
 });
 
-const EventComponent = ({ event, currentView }) => {
+
+
+
+const CustomEvent = ({ event, currentView, addEvent }) => {
     console.log(event)
-    let content = null;
-
-
-    switch (currentView) {
-        case "month":
-            content = (
-                <div className="event-content">
-                    <Scrollbars style={{ height: 40 }}>
-                        <p className="event-title"><b>{event.title}</b></p>
-
-                    </Scrollbars>
-                </div>
-            );
-            break;
-        case "week":
-            content = (
-                <div className="event-content">
-                    <Scrollbars style={{ height: 64 }}>
-                        {event.booking_elements
-                            .map((element, index) => {
-                                return (
-                                    <div
-                                        key={index}
-                                    >
-                                        <p className="element-tittle">
-                                            <b>{element.element_name}</b>
-                                        </p>
-                                        <p className="event-place">
-                                            {element.starttime.toLocaleString()} - {element.endtime.toLocaleString()}
-                                        </p>
-                                    </div>
-                                );
-                            })}
-                    </Scrollbars>
-                </div>
-            );
-            break;
-        case "day":
-            content = (
-                <div className="event-content">
-                    <Scrollbars style={{ height: 72 }}>
-                        {event.booking_elements?.map((element, index) => (
-                            <div key={index} className="booking-element">
-                                <p className="element-tittle"><b>{element.element_name}</b></p>
-                                <p className="event-place">{element.starttime.toLocaleString()} - {element.endtime.toLocaleString()}</p>
-                            </div>
-                        ))}
-                    </Scrollbars>
-                </div>
-            );
-            break;
-        default:
-            content = (
-                <div className="event-content">
-                    <p className="eventtitle"><b>{event.title}</b></p>
-                </div>
-            );
-    }
-
-    return content;
+    return (
+        <>
+            <div>
+                <h1>{event.title}</h1>
+            </div>
+        </>
+    )
 };
 
 
 const Calend = () => {
-    const [events, setEvents] = useState([]);
     const [currentView, setCurrentView] = useState("month");
     const [currentDate, setCurrentDate] = useState(new Date());
     const [SelectedEvent, setSelectedEvent] = useState("");
+    const dispatch = useDispatch();
+    const events = useSelector(selectEvents);
+
+
     const handleViewChange = (newView) => {
         setCurrentView(newView);
     };
@@ -160,14 +118,15 @@ const Calend = () => {
                         supplier_place: element.supplier_place,
                     })),
                 }));
-                const sortedEvents = bookingEvents.sort((eventA, eventB) => Number(eventA.number) - Number(eventB.number));
-                // console.log(sortedEvents)
-                setEvents(sortedEvents);
+                dispatch(addEvent(bookingEvents));
+                console.log(events)
+
+
             })
             .catch((error) => {
                 console.error("Erreur lors de la récupération des réservations :", error);
             });
-    }, [currentDate, currentView]);
+    }, [currentDate, currentView, dispatch]);
 
 
     const clickRef = useRef(null);
@@ -251,7 +210,6 @@ const Calend = () => {
                             localizer={localizer}
                             events={events.map((booking) => ({
                                 ...booking,
-
                                 booking_elements: booking.bookingelements.map((element) => ({
                                     element_name: element.element_name,
                                     start: new Date(element.startdate),
@@ -259,22 +217,19 @@ const Calend = () => {
                                     starttime: element.starttime,
                                     endtime: element.endtime,
                                     supplier_place: element.supplier_place,
-
                                 })),
                             }))}
 
                             startAccessor="start"
                             endAccessor="end"
                             style={{ height: 1000 }}
-                            components={{ event: (eventProps) => <EventComponent {...eventProps} currentView={currentView} /> }}
+                            components={{ event: (eventProps) => <CustomEvent {...eventProps} currentView={currentView} /> }}
                             onView={handleViewChange}
                             onNavigate={(newDate) => setCurrentDate(newDate)}
                             onSelectEvent={(event) => handleSelectEvent(event)}
                             showAllEvents
                             onDoubleClickEvent={onDoubleClickEvent}
                         />
-
-
 
                     </div>
                 </div>
